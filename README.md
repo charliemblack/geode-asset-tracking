@@ -1,15 +1,15 @@
-# GemFire Asset Tracking
+# Apache Geode Asset Tracking
 
-This project demonstrates the power of GemFire Search, providing GemFire users with advanced indexing techniques, including the ability to index geospatial data.
+This project demonstrates the power of Apache Geode Lucene indexing, providing users with advanced indexing techniques, including the ability to index geospatial data.
 
 The project consists of three parts:
 1. **Base Library**: Contains all common classes.
 2. **Simulator**: Uses a KML file of active truck lanes in California to randomly move vehicles around the state.
 3. **Web Server**: Hosts a mapping application.
 
-The focus of this project is on showcasing GemFire application development rather than creating a complex application. However, it can easily be extended to correlate tracking information with "beacon" information, providing a 360-degree view of the beacon.
+The focus of this project is on showcasing Apache Geode application development rather than creating a complex application. However, it can easily be extended to correlate tracking information with "beacon" information, providing a 360-degree view of the beacon.
 
-This 360-degree profile enrichment is accomplished using "cache listeners," "async event listeners," or "cache writer." The key is to stage the data with the identifier for the beacon, allowing for high throughput with in-memory performance. GemFire enhances this by co-locating regions, ensuring beacons operate on the servers holding the data.
+This 360-degree profile enrichment is accomplished using "cache listeners," "async event listeners," or "cache writer." The key is to stage the data with the identifier for the beacon, allowing for high throughput with in-memory performance. Geode enhances this by co-locating regions, ensuring beacons operate on the servers holding the data.
 
 The choice of technique depends on the use case:
 
@@ -19,35 +19,35 @@ The choice of technique depends on the use case:
 
 ## How to Use
 
-### Install GemFire and GemFire Search
+### Install Apache Geode and Geode Lucene
 
-Follow these steps to install GemFire and GemFire Search:
+Follow these steps to install Apache Geode with the Lucene module available:
 
-1. **Install GemFire**: Download and unarchive GemFire.
-2. **Install GemFire Search**: Download and copy GemFire Search into the GemFire `extensions` directory.
-
-For detailed instructions, refer to the documentation:
-- [GemFire Docs](https://docs.vmware.com/en/VMware-GemFire/10.1/gf/getting_started-installation-install_intro.html)
-- [GemFire Search Docs](https://docs.vmware.com/en/VMware-GemFire-Search/1.0/gemfire-search/search_integration.html#installing-2)
+1. **Install Geode**: Download and unpack the Apache Geode distribution.
+2. **Enable Lucene**: Ensure the Geode Lucene module (`geode-lucene`) is on the server classpath.
 
 ### Build the Projects
 
-Before starting GemFire, build the libraries for our domain objects in the [asset tracker library](tracker-lib) by running the `gradlew bootJar` command:
+Before starting Geode, build the libraries for our domain objects in the [asset tracker library](tracker-lib) by running the `gradlew bootJar` command, then copy runtime dependencies:
 
 ```shell
 gradlew bootJar
 ```
 
-### Run GemFire
+```shell
+gradlew tracker-lib:copyLuceneLibs
+```
 
-To simplify running GemFire, batch scripts are provided for local setup and configuration. For Windows, use the following command:
+### Run Geode
+
+To simplify running Geode, batch scripts are provided for local setup and configuration. For Windows, use the following command:
 
 ```shell
 cd <project>\scripts
-startGemFire.bat
+startGeode.bat
 ```
 
-This command starts GemFire with one locator and two servers, then deploys the necessary classes for GemFire Search to index and search the data. The deployed project is located in the [library](tracker-lib/src/main/java/demo/gemfire/asset/tracker/lib).
+This command starts Geode with one locator and two servers, then deploys the necessary classes for Geode Lucene to index and search the data. The deployed project is located in the [library](tracker-lib/src/main/java/demo/geode/asset/tracker/lib).
 
 The script also creates the index and a region for the demo.
 
@@ -62,7 +62,7 @@ gradlew tracker-simulator:bootRun
 
 ### Start the Web Application
 
-The web application uses OpenLayers for mapping capabilities and provides a REST interface to query beacons in a given area. The code for querying beacons can be found [here](tracker-web-app/src/main/java/demo/gemfire/asset/tracker/web/GeospatialWebServer.java).
+The web application uses OpenLayers for mapping capabilities and provides a REST interface to query beacons in a given area. The code for querying beacons can be found [here](tracker-web-app/src/main/java/demo/geode/asset/tracker/web/GeospatialWebServer.java).
 
 ```shell
 cd <project>
@@ -83,3 +83,4 @@ taskkill /f /im java.exe
 
 >curl "http://localhost:8080/query?minLng=-117.1208548486265&minLat=32.83976867526056&maxLng=-117.11506127715433&maxLat=32.843590641384694" 
 [{"lat":32.84179,"lng":-117.11903,"uid":"95299"},{"lat":32.841824,"lng":-117.11555,"uid":"60688"},{"lat":32.84179,"lng":-117.11868,"uid":"83857"},{"lat":32.841812,"lng":-117.11744,"uid":"74060"},{"lat":32.84179,"lng":-117.11903,"uid":"98491"},{"lat":32.841812,"lng":-117.11744,"uid":"73182"},{"lat":32.841824,"lng":-117.11555,"uid":"58739"},{"lat":32.84182,"lng":-117.11689,"uid":"66694"},{"lat":32.84179,"lng":-117.11903,"uid":"92442"},{"lat":32.84179,"lng":-117.11903,"uid":"92325"},{"lat":32.841866,"lng":-117.11413,"uid":"52801"},{"lat":32.84182,"lng":-117.11689,"uid":"69312"},{"lat":32.841866,"lng":-117.11413,"uid":"53019"},{"lat":32.841812,"lng":-117.11744,"uid":"81841"},{"lat":32.841824,"lng":-117.11555,"uid":"57492"},{"lat":32.84179,"lng":-117.11903,"uid":"96609"},{"lat":32.841824,"lng":-117.11555,"uid":"56277"},{"lat":32.84179,"lng":-117.11903,"uid":"95898"},{"lat":32.841812,"lng":-117.11744,"uid":"75009"}]
+

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.locationtech.jts.geom.Envelope;
@@ -236,3 +236,4 @@ public class BasicQuadTreeImpl  {
         }
     }
 }
+

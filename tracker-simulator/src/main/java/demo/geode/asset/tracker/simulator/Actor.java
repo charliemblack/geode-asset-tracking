@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import net.sf.geographiclib.Geodesic;
 import net.sf.geographiclib.GeodesicData;
@@ -114,7 +114,7 @@ public class Actor {
         Coordinate coordinate2 = nextEvent();
 
         double distanceInMiles = distanceInMiles(coordinate1.y, coordinate1.x, coordinate2.y, coordinate2.x);
-        //Calculates time required to ride a fixed distance in a given average speed. Formula: Time = Distance ÷ Speed
+        //Calculates time required to ride a fixed distance in a given average speed. Formula: Time = Distance ?? Speed
         return (int) (distanceInMiles / getMilesPerMillisecond());
     }
 
@@ -127,3 +127,4 @@ public class Actor {
         return g.s12;
     }
 }
+

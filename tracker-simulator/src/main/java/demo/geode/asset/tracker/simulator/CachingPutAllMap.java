@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -326,3 +326,4 @@ public class CachingPutAllMap implements ConcurrentMap, InitializingBean, BeanNa
         this.beanName = name;
     }
 }
+

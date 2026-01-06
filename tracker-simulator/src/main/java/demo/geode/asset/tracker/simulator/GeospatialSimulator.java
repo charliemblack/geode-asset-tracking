@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.ClientRegionShortcut;
-import demo.gemfire.asset.tracker.lib.LocationEvent;
-import demo.gemfire.asset.tracker.lib.ToolBox;
+import demo.geode.asset.tracker.lib.LocationEvent;
+import demo.geode.asset.tracker.lib.ToolBox;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.slf4j.Logger;
@@ -159,3 +159,4 @@ public class GeospatialSimulator implements InitializingBean {
                 .run();
     }
 }
+

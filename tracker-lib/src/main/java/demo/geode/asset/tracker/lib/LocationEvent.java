@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.lib;
+package demo.geode.asset.tracker.lib;
 
 
 import org.apache.geode.DataSerializable;
@@ -96,3 +96,4 @@ public class LocationEvent implements DataSerializable {
         uid = DataSerializer.readString(dataInput);
     }
 }
+

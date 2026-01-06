@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import org.eclipse.collections.impl.set.mutable.UnifiedSet;
 import org.locationtech.jts.geom.Geometry;
@@ -49,3 +49,4 @@ public class IntersectsVisitor implements ItemVisitor {
         }
     }
 }
+

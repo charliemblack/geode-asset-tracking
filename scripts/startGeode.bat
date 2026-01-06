@@ -6,6 +6,16 @@ PUSHD %~dp0..
 IF NOT DEFINED APP_HOME SET "APP_HOME=%CD%"
 POPD
 
+:: Verify Lucene deps are available on the server classpath
+if not exist "%APP_HOME%\tracker-lib\build\libs\tracker-lib.jar" (
+    echo Missing tracker-lib jar. Run: gradlew bootJar
+    exit /b 1
+)
+if not exist "%APP_HOME%\tracker-lib\build\lucene-libs\*.jar" (
+    echo Missing Lucene libs. Run: gradlew tracker-lib:copyLuceneLibs
+    exit /b 1
+)
+
 :: Default memory and JVM options
 set "DEFAULT_LOCATOR_MEMORY=1g"
 set "DEFAULT_SERVER_MEMORY=4g"
@@ -21,9 +31,9 @@ set "COMMON_LOCATOR_ITEMS=%COMMON_LOCATOR_ITEMS% %DEFAULT_JVM_OPTS%"
 :: Create the locator directory
 mkdir "%APP_HOME%\data\locator1"
 
-echo Starting GemFire at %TIME%
+echo Starting Geode at %TIME%
 :: Start locator
-start "startingGemFireLocator" /min  cmd /c gfsh -e "start locator --name=locator1 --dir=%APP_HOME%\data\locator1 --port=10334 %COMMON_LOCATOR_ITEMS%"
+start "startingGeodeLocator" /min  cmd /c gfsh -e "start locator --name=locator1 --dir=%APP_HOME%\data\locator1 --port=10334 %COMMON_LOCATOR_ITEMS%"
 
 :: Specify the port to check'
 :: We are going use the http services port since it is towards the end of the locator startup
@@ -36,7 +46,7 @@ set "delay=5"
 :CHECK_PORT
 
 :: Use netstat to check if the port is listening
-:: If you decide to use netstat there seems to be a delay between the port in listening mode and willing to accept  ¯\_(ツ)_/¯
+:: If you decide to use netstat there seems to be a delay between the port in listening mode and willing to accept  ??\_(???)_/??
 ::netstat -an | find ":%port%" | find "LISTENING" >nul 2>&1
 
 :: Use PowerShell to check if the port is open
@@ -58,6 +68,7 @@ set "COMMON_SERVER_ITEMS=--J=-Xmx%DEFAULT_SERVER_MEMORY% --J=-Xms%DEFAULT_SERVER
 set "COMMON_SERVER_ITEMS=%COMMON_SERVER_ITEMS% %DEFAULT_JVM_OPTS%"
 set "COMMON_SERVER_ITEMS=%COMMON_SERVER_ITEMS% --server-port=0"
 set "COMMON_SERVER_ITEMS=%COMMON_SERVER_ITEMS% --rebalance"
+set "COMMON_SERVER_ITEMS=%COMMON_SERVER_ITEMS% --classpath=%APP_HOME%\\tracker-lib\\build\\libs\\tracker-lib.jar;%APP_HOME%\\tracker-lib\\build\\lucene-libs\\*"
 
 :: Remove process file if it exists
 del /F /Q "%APP_HOME%\data\processfile.txt" 2>nul
@@ -65,7 +76,7 @@ del /F /Q "%APP_HOME%\data\processfile.txt" 2>nul
 :: Start multiple servers
 for %%i in (1 2) do (
     set /a port=7070 + %%i * 10
-    start "startingGemFireServer%%i" /min cmd /c ^
+    start "startingGeodeServer%%i" /min cmd /c ^
     "gfsh -e ^"connect --locator=%LOCATORS%^" -e ^"start server --name=server%%i --dir=%APP_HOME%\data\server%%i --start-rest-api=true --http-service-port=!port! %COMMON_SERVER_ITEMS%^" ^& echo server%%i ^>^> %APP_HOME%\data\processfile.txt"
 )
 
@@ -87,6 +98,7 @@ if "%allStarted%" equ "false" (
 )
 echo Servers started at %TIME%
 :CONTINUE
-gfsh -e "connect --locator=%LOCATORS%" -e "deploy --jar %APP_HOME%/tracker-lib/build/libs/tracker-lib.jar" -e "create lucene index --name=simpleIndex --region=geoSpatialRegion --field=uid --serializer=demo.gemfire.asset.tracker.lib.LocationInfoSerializer" -e "create region --name=geoSpatialRegion --type=PARTITION_REDUNDANT"
-echo GemFire started and configured at %TIME%
+gfsh -e "connect --locator=%LOCATORS%" -e "create lucene index --name=simpleIndex --region=geoSpatialRegion --field=uid --serializer=demo.geode.asset.tracker.lib.LocationInfoSerializer" -e "create region --name=geoSpatialRegion --type=PARTITION_REDUNDANT"
+echo Geode started and configured at %TIME%
+
 

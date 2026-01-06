@@ -1,4 +1,4 @@
-package demo.gemfire.asset.tracker.lib;
+package demo.geode.asset.tracker.lib;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +19,7 @@ public class LocationInfoSerializer implements LuceneSerializer<LocationEvent> {
         Document doc = new Document();
         doc.add(new TextField("uid", value.getUid(), Field.Store.NO));
 
-        Field[] fields = SpaitalHelper.getIndexableFields(value.getLng(), value.getLat());
+        Field[] fields = SpatialHelper.getIndexableFields(value.getLng(), value.getLat());
 
         for (Field field : fields) {
             doc.add(field);
@@ -29,4 +29,6 @@ public class LocationInfoSerializer implements LuceneSerializer<LocationEvent> {
     }
 
 }
+
+
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.lib;
+package demo.geode.asset.tracker.lib;
 
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.slf4j.Logger;
@@ -81,3 +81,4 @@ public class ToolBox {
         return properties;
     }
 }
+

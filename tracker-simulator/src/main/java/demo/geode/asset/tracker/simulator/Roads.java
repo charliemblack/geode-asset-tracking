@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.simulator;
+package demo.geode.asset.tracker.simulator;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.geotools.kml.KMLConfiguration;
@@ -201,3 +201,4 @@ public class Roads {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package demo.gemfire.asset.tracker.lib;
+package demo.geode.asset.tracker.lib;
 
 import static org.locationtech.spatial4j.distance.DistanceUtils.EARTH_MEAN_RADIUS_MI;
 
@@ -16,7 +16,7 @@ import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.impl.GeoCircle;
 import org.locationtech.spatial4j.shape.impl.PointImpl;
 
-public class SpaitalHelper {
+public class SpatialHelper {
     private static final SpatialContext CONTEXT = SpatialContext.GEO;
     private static final PointVectorStrategy STRATEGY =
             new PointVectorStrategy(CONTEXT, "location", PointVectorStrategy.DEFAULT_FIELDTYPE);
@@ -64,8 +64,22 @@ public class SpaitalHelper {
 
 
     static Shape getShape(double minLong, double minLat, double maxLong, double maxLat) {
-        return CONTEXT.getShapeFactory().rect((createPoint(minLong, minLat)),
-                (createPoint(maxLong, maxLat)));
+        double normMinLong = clampLng(normalizeLng(minLong));
+        double normMaxLong = clampLng(normalizeLng(maxLong));
+        double normMinLat = clampLat(minLat);
+        double normMaxLat = clampLat(maxLat);
+        if (normMinLong > normMaxLong) {
+            double tmp = normMinLong;
+            normMinLong = normMaxLong;
+            normMaxLong = tmp;
+        }
+        if (normMinLat > normMaxLat) {
+            double tmp = normMinLat;
+            normMinLat = normMaxLat;
+            normMaxLat = tmp;
+        }
+        return CONTEXT.getShapeFactory().rect((createPoint(normMinLong, normMinLat)),
+                (createPoint(normMaxLong, normMaxLat)));
 
     }
 
@@ -79,4 +93,24 @@ public class SpaitalHelper {
     public static LuceneQuery<String, LocationEvent> findInRectangle(String indexName, String regionName, double minLng, double minLat, double maxLng, double maxLat, LuceneService luceneService) {
         return luceneService.createLuceneQueryFactory().create(indexName, regionName, index -> findLocationThatIsInsideTheRectangle(minLng, minLat, maxLng, maxLat));
     }
+
+    private static double clampLng(double value) {
+        return Math.max(-180.0, Math.min(180.0, value));
+    }
+
+    private static double clampLat(double value) {
+        return Math.max(-90.0, Math.min(90.0, value));
+    }
+
+    private static double normalizeLng(double value) {
+        double normalized = value % 360.0;
+        if (normalized > 180.0) {
+            normalized -= 360.0;
+        } else if (normalized < -180.0) {
+            normalized += 360.0;
+        }
+        return normalized;
+    }
 }
+
+

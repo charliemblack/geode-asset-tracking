@@ -1,40 +1,53 @@
 plugins {
-    id 'org.springframework.boot' version '3.2.5' apply false
-    id 'io.spring.dependency-management' version '1.1.5'
     id 'java'
+    id 'io.spring.dependency-management' version '1.1.5'
+    id 'org.springframework.boot' version '3.2.5' apply false
 }
 
-group = 'com.vmware.gemfire.demo'
+group = 'org.apache.geode.demo'
 version = '1.0.0.SNAPSHOT'
 sourceCompatibility = '17'
 
 repositories {
+    maven { url 'https://repo.osgeo.org/repository/release' }
     mavenCentral()
     maven { url 'https://repo.spring.io/libs-release' }
-    maven {
-        url "https://commercial-repo.pivotal.io/data3/gemfire-release-repo/gemfire"
-        credentials {
-            username = "$mavenUser"
-            password = "$mavenPassword"
-        }
-    }
+}
+
+/*
+ * GLOBAL logging enforcement
+ * Geode requires Log4j2 directly
+ */
+configurations.all {
+    exclude group: "ch.qos.logback", module: "logback-classic"
+    exclude group: "ch.qos.logback", module: "logback-core"
+    exclude group: "org.apache.logging.log4j", module: "log4j-to-slf4j"
+    exclude group: "commons-logging", module: "commons-logging"
 }
 
 ext {
-    gemfireVersion = '10.1.0'
-    gemfireLuceneVersion = '1.0.0'
+    geodeVersion = '2.0.0'
+    springBootVersion = '3.2.5'
     springCoreVersion = '6.1.6'
-    springGemFireBoot = '1.0.1'
-    springBootVersion = '3.1.11'
+
     googleGuavaVersion = '33.2.0-jre'
-    junitVersion = '4.13.2'
-    slf4jVersion = '2.0.13'
-    jettyVersion = '11.0.20'
+    geoToolsVersion = '24.7'
     jtsVersion = '1.18.2'
     eclipseCollectionsVersion = '11.1.0'
-    geoToolsVersion = '24.7'
-    log4jVersion = '2.23.1'
-    logbackVersion = '1.5.6'
+}
+
+def resolveLuceneVersionFromGeode = {
+    def geodeLuceneConfig = configurations.detachedConfiguration(
+        dependencies.create("org.apache.geode:geode-lucene:${geodeVersion}")
+    )
+    def luceneCore = geodeLuceneConfig.resolvedConfiguration.resolvedArtifacts.find { artifact ->
+        artifact.moduleVersion.id.group == 'org.apache.lucene' &&
+            artifact.moduleVersion.id.name == 'lucene-core'
+    }
+    if (luceneCore == null) {
+        throw new GradleException("Unable to resolve lucene-core version from geode-lucene ${geodeVersion}")
+    }
+    return luceneCore.moduleVersion.id.version
 }
 
 subprojects {
@@ -45,66 +58,98 @@ subprojects {
         maven { url 'https://repo.osgeo.org/repository/release' }
         mavenCentral()
         maven { url 'https://repo.spring.io/libs-release' }
-        maven { url 'https://repo.spring.io/libs-milestone' }
-        maven { url 'https://repo.spring.io/libs-snapshot' }
-        maven {
-            url "https://commercial-repo.pivotal.io/data3/gemfire-release-repo/gemfire"
-            credentials {
-                username = "$mavenUser"
-                password = "$mavenPassword"
-            }
+    }
+
+    dependencies {
+        // Apache Geode
+        implementation "org.apache.geode:geode-core:${geodeVersion}"
+        implementation "org.apache.geode:geode-cq:${geodeVersion}"
+        implementation "org.apache.geode:geode-wan:${geodeVersion}"
+        implementation "org.apache.geode:geode-lucene:${geodeVersion}"
+    }
+}
+
+/*
+ * tracker-lib
+ */
+project(':tracker-lib') {
+    dependencies {
+        implementation "org.springframework:spring-context:${springCoreVersion}"
+        implementation "org.apache.lucene:lucene-spatial-extras:${resolveLuceneVersionFromGeode()}"
+    }
+
+    tasks.register('copyLuceneLibs', Copy) {
+        from(configurations.runtimeClasspath) {
+            include '**/lucene-*.jar'
+            include '**/spatial4j-*.jar'
+        }
+        into "$buildDir/lucene-libs"
+    }
+
+    tasks.named('build') {
+        dependsOn tasks.named('copyLuceneLibs')
+    }
+}
+
+/*
+ * tracker-simulator
+ */
+project(':tracker-simulator') {
+    apply plugin: 'org.springframework.boot'
+
+    configurations {
+        runtimeClasspath {
+            exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+            exclude group: "ch.qos.logback", module: "logback-classic"
+            exclude group: "org.apache.logging.log4j", module: "log4j-to-slf4j"
         }
     }
 
     dependencies {
-        implementation "com.vmware.gemfire:gemfire-core:${gemfireVersion}"
-        implementation "com.vmware.gemfire:gemfire-cq:${gemfireVersion}"
-        implementation "com.vmware.gemfire:gemfire-wan:${gemfireVersion}"
-        implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-        implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-        implementation("org.apache.lucene:lucene-spatial-extras:9.3.0")
-        implementation("com.vmware.gemfire:gemfire-search:${gemfireLuceneVersion}")
-
-    }
-}
-
-project(':tracker-lib') {
-    dependencies {
-        implementation "org.springframework:spring-context:${springCoreVersion}"
-    }
-}
-
-project(':tracker-simulator') {
-    apply plugin: 'org.springframework.boot'
-
-    dependencies {
         implementation project(':tracker-lib')
-        implementation 'org.springframework.boot:spring-boot-starter'
-        implementation "com.vmware.gemfire:gemfire-core:${gemfireVersion}"
-        implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
+
+        implementation "org.springframework.boot:spring-boot-starter"
+        implementation "org.springframework.boot:spring-boot-starter-log4j2"
+
         implementation "org.geotools.xsd:gt-xsd-kml:${geoToolsVersion}"
         implementation "org.geotools:gt-epsg-wkt:${geoToolsVersion}"
         implementation "org.geotools:gt-jts-wrapper:${geoToolsVersion}"
         implementation "org.geotools:gt-xml:${geoToolsVersion}"
+
         implementation "org.locationtech.jts:jts-core:${jtsVersion}"
         implementation "com.google.guava:guava:${googleGuavaVersion}"
         implementation "org.eclipse.collections:eclipse-collections:${eclipseCollectionsVersion}"
     }
 }
 
+
+/*
+ * tracker-web-app
+ */
 project(':tracker-web-app') {
     apply plugin: 'org.springframework.boot'
 
+    springBoot {
+        buildInfo()
+    }
+
+    configurations {
+        runtimeClasspath {
+            exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+            exclude group: "ch.qos.logback", module: "logback-classic"
+            exclude group: "org.apache.logging.log4j", module: "log4j-to-slf4j"
+        }
+    }
+
     dependencies {
         implementation project(':tracker-lib')
+
+        implementation "org.springframework.boot:spring-boot-starter-web"
+        implementation "org.springframework.boot:spring-boot-starter-log4j2"
+
         implementation "com.fasterxml.jackson.core:jackson-core:2.17.1"
         implementation "com.fasterxml.jackson.core:jackson-databind:2.17.1"
-        implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+
         implementation "org.locationtech.jts:jts-core:${jtsVersion}"
-        implementation "com.vmware.gemfire:gemfire-core:${gemfireVersion}"
-        implementation "org.apache.logging.log4j:log4j-api:${log4jVersion}"
-        implementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
-        implementation("org.apache.lucene:lucene-spatial-extras:9.3.0")
-        implementation("com.vmware.gemfire:gemfire-search:${gemfireLuceneVersion}")
     }
 }

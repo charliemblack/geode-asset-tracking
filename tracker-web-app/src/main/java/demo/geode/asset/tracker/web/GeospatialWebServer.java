@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package demo.gemfire.asset.tracker.web;
+package demo.geode.asset.tracker.web;
 
-import demo.gemfire.asset.tracker.lib.LocationEvent;
-import demo.gemfire.asset.tracker.lib.SpaitalHelper;
-import demo.gemfire.asset.tracker.lib.ToolBox;
+import demo.geode.asset.tracker.lib.LocationEvent;
+import demo.geode.asset.tracker.lib.SpatialHelper;
+import demo.geode.asset.tracker.lib.ToolBox;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.geode.cache.client.ClientRegionShortcut;
@@ -60,10 +60,12 @@ public class GeospatialWebServer implements InitializingBean {
     @RequestMapping(value = "/query", method = RequestMethod.GET, produces = "application/json")
     public Collection<LocationEvent> query(double minLng, double minLat, double maxLng, double maxLat) throws ParseException, LuceneQueryException {
         LuceneService luceneService = LuceneServiceProvider.get(clientCache);
-        LuceneQuery<String, LocationEvent> luceneQuery = SpaitalHelper.findInRectangle("simpleIndex", "geoSpatialRegion", minLng, minLat, maxLng, maxLat, luceneService);
+        LuceneQuery<String, LocationEvent> luceneQuery = SpatialHelper.findInRectangle("simpleIndex", "geoSpatialRegion", minLng, minLat, maxLng, maxLat, luceneService);
         return luceneQuery.findValues();
     }
     public static void main(String[] args) {
         SpringApplication.run(GeospatialWebServer.class, args);
     }
 }
+
+

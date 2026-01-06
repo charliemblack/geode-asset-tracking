@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-rootProject.name='gemfire-geospatial-index'
+rootProject.name='geode-geospatial-index'
 include 'tracker-lib','tracker-simulator','tracker-web-app'
 
 // Disable building the root project

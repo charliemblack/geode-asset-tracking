@@ -6,6 +6,15 @@ cd "`dirname \"$PRG\"`/.." >&-
 APP_HOME="`pwd -P`"
 cd "$SAVED" >&-
 
+if [ ! -f "${APP_HOME}/tracker-lib/build/libs/tracker-lib.jar" ]; then
+    echo "Missing tracker-lib jar. Run: gradlew bootJar"
+    exit 1
+fi
+if [ ! -d "${APP_HOME}/tracker-lib/build/lucene-libs" ] || ! ls "${APP_HOME}/tracker-lib/build/lucene-libs/"*.jar >/dev/null 2>&1; then
+    echo "Missing Lucene libs. Run: gradlew tracker-lib:copyLuceneLibs"
+    exit 1
+fi
+
 function waitForPort {
 
     (exec 6<>/dev/tcp/127.0.0.1/$1) &>/dev/null
@@ -31,6 +40,7 @@ LOCATOR_OPTS="${LOCATOR_OPTS} --dir=${APP_HOME}/data/locator"
 SERVER_OPTS="${DEFAULT_SERVER_MEMORY} ${DEFAULT_JVM_OPTS}"
 SERVER_OPTS="${SERVER_OPTS} --locators=localhost[10334]"
 SERVER_OPTS="${SERVER_OPTS} --server-port=0"
+SERVER_OPTS="${SERVER_OPTS} --classpath=${APP_HOME}/tracker-lib/build/libs/tracker-lib.jar:${APP_HOME}/tracker-lib/build/lucene-libs/*"
 
 
 mkdir -p ${APP_HOME}/data/locator
@@ -47,6 +57,7 @@ gfsh --e "start server  ${SERVER_OPTS} --name=server2 --dir=${APP_HOME}/data/ser
 
 wait
 
-gfsh -e "connect " -e "deploy --jar ${APP_HOME}/tracker-lib/build/libs/tracker-lib.jar" -e "create lucene index --name=simpleIndex --region=geoSpatialRegion --field=uid --serializer=demo.gemfire.asset.tracker.lib.LocationInfoSerializer" -e "create region --name=geoSpatialRegion --type=PARTITION_REDUNDANT"
+gfsh -e "connect " -e "create lucene index --name=simpleIndex --region=geoSpatialRegion --field=uid --serializer=demo.geode.asset.tracker.lib.LocationInfoSerializer" -e "create region --name=geoSpatialRegion --type=PARTITION_REDUNDANT"
+
 
 
