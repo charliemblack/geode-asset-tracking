@@ -1,6 +1,6 @@
 # Apache Geode Asset Tracking
 
-This project demonstrates the power of Apache Geode Lucene indexing, providing users with advanced indexing techniques, including the ability to index geospatial data.
+This project demonstrates Apache Geode's Lucene indexing capabilities for geospatial data, using spatial queries over indexed locations.
 
 The project consists of three parts:
 1. **Base Library**: Contains all common classes.
@@ -19,12 +19,11 @@ The choice of technique depends on the use case:
 
 ## How to Use
 
-### Install Apache Geode and Geode Lucene
+### Install Apache Geode
 
-Follow these steps to install Apache Geode with the Lucene module available:
+Follow these steps to install Apache Geode:
 
 1. **Install Geode**: Download and unpack the Apache Geode distribution.
-2. **Enable Lucene**: Ensure the Geode Lucene module (`geode-lucene`) is on the server classpath.
 
 ### Build the Projects
 
@@ -37,6 +36,7 @@ gradlew bootJar
 ```shell
 gradlew tracker-lib:copyLuceneLibs
 ```
+This copies Geode’s Lucene/Spatial runtime jars into `tracker-lib/build/lucene-libs` so the server classpath can pick them up when starting Geode.
 
 ### Run Geode
 
@@ -47,7 +47,7 @@ cd <project>\scripts
 startGeode.bat
 ```
 
-This command starts Geode with one locator and two servers, then deploys the necessary classes for Geode Lucene to index and search the data. The deployed project is located in the [library](tracker-lib/src/main/java/demo/geode/asset/tracker/lib).
+This command starts Geode with one locator and two servers, then deploys the necessary classes for Geode Lucene indexing and searching. The deployed project is located in the [library](tracker-lib/src/main/java/demo/geode/asset/tracker/lib).
 
 The script also creates the index and a region for the demo.
 
