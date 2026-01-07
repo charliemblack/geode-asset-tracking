@@ -71,7 +71,8 @@ public class GeospatialSimulator implements InitializingBean {
     private GeometryFactory geometryFactory = new GeometryFactory();
 
     public void run() {
-        final PriorityBlockingQueue<Actor> priorityQueue = new PriorityBlockingQueue<>(numberOfActors, (Comparator<Actor>) (o1, o2) -> (int) (o1.timeToAdvance() - o2.timeToAdvance()));
+        final PriorityBlockingQueue<Actor> priorityQueue = new PriorityBlockingQueue<>(numberOfActors,
+                Comparator.comparingLong(Actor::timeToAdvance));
 
         //Slam in a couple tracks to keep the simulators busy
         int initialCount = numberOfSimulators * 2;
@@ -83,6 +84,10 @@ public class GeospatialSimulator implements InitializingBean {
             new Thread(() -> {
                 while (true) {
                     Actor actor = priorityQueue.poll();
+                    if (actor == null) {
+                        Thread.yield();
+                        continue;
+                    }
                     long currentDelay = actor.timeToAdvance() - System.currentTimeMillis();
                     if (currentDelay <= 0) {
                         try {

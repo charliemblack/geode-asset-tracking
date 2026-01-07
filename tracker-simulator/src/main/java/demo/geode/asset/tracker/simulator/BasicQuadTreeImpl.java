@@ -54,7 +54,7 @@ public class BasicQuadTreeImpl  {
     private Quad top = new Quad(new Envelope(-180, 180, -90, 90), maxDepth);
     private GeometryFactory geometryFactory = new GeometryFactory();
 
-    public void setGeometryFactory(GeometryFactory eometryFactory) {
+    public void setGeometryFactory(GeometryFactory geometryFactory) {
         this.geometryFactory = geometryFactory;
     }
 

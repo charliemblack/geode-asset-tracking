@@ -51,6 +51,15 @@ public class CachingPutAllMap implements ConcurrentMap, InitializingBean, BeanNa
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (timeoutms > 0) {
+            if (scheduler == null) {
+                ThreadPoolTaskScheduler localScheduler = new ThreadPoolTaskScheduler();
+                localScheduler.setThreadNamePrefix("CachingPutAllMap-");
+                localScheduler.initialize();
+                scheduler = localScheduler;
+            }
+            scheduler.scheduleAtFixedRate(this::push, timeoutms);
+        }
     }
 
     private void push() {
@@ -120,7 +129,7 @@ public class CachingPutAllMap implements ConcurrentMap, InitializingBean, BeanNa
     public boolean isEmpty() {
         readLock.lock();
         try {
-            return bulkMap.isEmpty() || wrappedMap.isEmpty();
+            return bulkMap.isEmpty() && wrappedMap.isEmpty();
         } finally {
             readLock.unlock();
         }
